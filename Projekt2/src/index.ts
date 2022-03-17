@@ -4,6 +4,8 @@ import {Request, Response} from 'express'
 const app = express()
 app.use(express.json())
 
+
+//NOTATKA
 export interface Note{
   title:string;
   content:string;
@@ -12,13 +14,12 @@ export interface Note{
   id?:number;
 }
 const notes: Note[]= [
-  {
-    title: "Notka1",
-    content : "Przykladowa notatka",
-    id:54
-  }
+  // {
+  //   title: "Notka1",
+  //   content : "Przykladowa notatka",
+  //   id:54
+  //}
 ]
-
 //DODAWANIE
 app.post('/note', function(req: Request, res: Response){
   // const note = JSON.stringify(notes)
@@ -35,7 +36,6 @@ app.post('/note', function(req: Request, res: Response){
 
 //WYŚWIETLANIE
 app.get('/note/:id', function(req: Request, res: Response){
-
     const id = Number(req.params.id)
     const note = notes.find(note => note.id === id)
     if(note == undefined ) res.status(404).send('Note does not exist')
@@ -68,10 +68,46 @@ app.delete('/note/:id', function(req: Request, res: Response){
     res.status(204)
 })
 
-
- app.get('/note', function(req: Request, res: Response){
-     res.send(notes)
+//POBIERANIE LISTY NOTATEK
+app.get('/notes', function(req: Request, res: Response){
+  if(notes == undefined) res.status(400)
+     res.status(200).send(notes)
  })
+
+//==================================//
+//TAGI//
+export interface Tag{
+  id?: number;
+  name: string;
+}
+const tags: Tag[] = []
+
+//DODAWANIE TAGU
+app.post('/tag', function (req: Request, res: Response) {
+  const tag = req.body
+  if(tag.name == undefined) res.status(400).send('Tag is undefined')
+
+  // const id = Number(req.params.id)
+  // const note = notes.find(note => note.id === id)
+  //  if(note == undefined ) res.status(404).send('Note does not exist')
+
+  // const id = Number(req.params.id)
+  // const existingtag = tags.find(tag => tag.id === id)
+  // if(existingtag != undefined) res.status(404).send('Tag exists!')
+  
+  const tagId = Date.now()
+  const tagWithId = {id: tagId, ...tag}
+  tags.push(tagWithId)
+  res.status(201).send(`${tagId}`)
+})
+
+//LISTA TAGÓW
+app.get('/tags', function(req: Request, res: Response){
+  if(tags == undefined) res.status(400)
+     res.status(200).send(tags)
+ })
+
+
 app.get('/', function (req: Request, res: Response) {
   res.send('GET Hello World')
 })
