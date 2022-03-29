@@ -2,25 +2,59 @@ import express from 'express'
 import {Request, Response} from 'express'
 import {Note} from './Note'
 import {Tag} from './Tag'
+import fs from 'fs';
 
 const app = express()
 app.use(express.json())
 
 //Deklaracja
-const notes: Note[] = []
-const tags: Tag[] = []
+const notes: Note[] = [
+  // {
+  //   title: "Notatka",
+  //   content: "a",
+  //   createDate: "16-02-2022",
+  //   tags: [{ id: 1, name: "gry" }],
+  //   id: 1,
+  // }
+]
+const tags: Tag[] = [
+//   {
+//   id: 1,
+//   name: "gry",
+// }
+]
+
+async function readStorage(): Promise<void> {
+    try {
+        const data = await fs.promises.readFile('./storeFile.json', 'utf-8');
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+async function updateStorage(data:Note): Promise<void> {
+  try {
+      await fs.promises.writeFile('./storeFile.json', JSON.stringify(data));
+  } catch (err) {
+      console.log(err)
+  }
+}
+
 
 //DODAWANIE
-app.post('/note', function(req: Request, res: Response){
+app.post('/note', async function(req: Request, res: Response){
+  await readStorage()
   const note = req.body
   if(note.title == undefined) res.status(400).send('Note title is undefined')
   if(note.content == undefined) res.status(400).send('Note content is undefined')
   note.id = Date.now()
   notes.push(note)
   res.status(201).send(note)
+  await updateStorage(note)
 })
 //Wyswietlanie
-app.get('/note/:id', function(req: Request, res: Response){
+app.get('/note/:id', async function(req: Request, res: Response){
+  await readStorage();
   const id = Number(req.params.id)
   const note = notes.find(note => note.id === id)
   if(note == undefined ) res.status(404).send('Note does not exist')
@@ -28,7 +62,7 @@ app.get('/note/:id', function(req: Request, res: Response){
 })
 
 //EDYCJA
-app.put('/note/:id', function(req: Request, res: Response){
+app.put('/note/:id', async function(req: Request, res: Response){
   const id = Number(req.params.id)
   const note = notes.findIndex(note => note.id === id)
   if(note == undefined ) res.status(404).send('Note does not exist')
@@ -44,6 +78,7 @@ app.put('/note/:id', function(req: Request, res: Response){
   if(updatedNote.content == undefined) res.status(404).send('Note content is undefined')
   notes[note] = updatedNote
   res.send().status(204)
+  await updateStorage(updatedNote)
 })
 
 //USUWANIE
@@ -56,9 +91,11 @@ app.delete('/note/:id', function(req: Request, res: Response){
 })
 
 //POBIERANIE LISTY NOTATEK
-app.get('/notes', function(req: Request, res: Response){
+app.get('/notes', async function(req: Request, res: Response){
   if(notes == undefined) res.status(400)
-     res.status(200).send(notes)
+  await readStorage();
+  res.status(200).send(notes)
+  
  })
 
 
