@@ -1,25 +1,36 @@
 import express from 'express'
 import {Request, Response} from 'express'
-import {Note} from './Note'
-import {Tag} from './Tag'
-import {User} from './User'
+import {Note} from '../Models/Note'
+import {Tag} from '../Models/Tag'
+import {User, Auth} from '../Models/User'
 import fs from 'fs';
 import jwt from "jsonwebtoken";
+import {All} from '../Models/All'
 
 const app = express()
 app.use(express.json())
 
-//LOGOWANIE
+const ACCESS_TOKEN = 'bckjabdkjawj4l23k4j23lj4i23o4u328908342';
 
-app.post('/login', (req: Request, res: Response) =>{
-  
-})
-
+let all:All
 //Deklaracja
 const notes: Note[] = []
 const tags: Tag[] = []
-const users: User[] = []
+const users: User[] = [{ id: 12, login: 'czlowiek', password: '123456'}]
+
  
+//LOGOWANIE
+app.post('/login', (req: Request, res: Response) =>{
+  const user = users.find(u => u.login === req.body.login)
+  if(!user)
+    return res.send("User not exists").status(401)
+
+  const payload = user;
+  const token = jwt.sign(payload, ACCESS_TOKEN);
+  res.json({token})
+})
+
+
 async function readStorage(): Promise<void> {
     try {
         const data = await fs.promises.readFile('./storeFile.json', 'utf-8');
@@ -35,6 +46,18 @@ async function updateStorage(data:Note): Promise<void> {
       console.log(err)
   }
 }
+
+//POBIERANIE LISTY NOTATEK
+app.get('/notes', async function(req: Request, res: Response){
+  if(Auth(req, res, ACCESS_TOKEN)){
+    if(notes == undefined) res.status(400)
+    await readStorage();
+    res.status(200).send(notes)
+  }
+  else{
+    res.status(403).send("Access denied")
+  }
+ })
 
 //Wyswietlanie
 app.get('/note/:id', async function(req: Request, res: Response){
@@ -90,15 +113,6 @@ app.delete('/note/:id', async function (req: Request, res: Response){
       await updateStorage(note);
   }
 })
-
-//POBIERANIE LISTY NOTATEK
-app.get('/notes', async function(req: Request, res: Response){
-  if(notes == undefined) res.status(400)
-  await readStorage();
-  res.status(200).send(notes)
-  
- })
-
 
  //DODAWANIE TAGOW
 app.post('/tag', function(req: Request, res: Response){
