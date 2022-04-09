@@ -2,28 +2,24 @@ import express from 'express'
 import {Request, Response} from 'express'
 import {Note} from './Note'
 import {Tag} from './Tag'
+import {User} from './User'
 import fs from 'fs';
+import jwt from "jsonwebtoken";
 
 const app = express()
 app.use(express.json())
 
-//Deklaracja
-const notes: Note[] = [
-  // {
-  //   title: "Notatka",
-  //   content: "a",
-  //   createDate: "16-02-2022",
-  //   tags: [{ id: 1, name: "gry" }],
-  //   id: 1,
-  // }
-]
-const tags: Tag[] = [
-//   {
-//   id: 1,
-//   name: "gry",
-// }
-]
+//LOGOWANIE
 
+app.post('/login', (req: Request, res: Response) =>{
+  
+})
+
+//Deklaracja
+const notes: Note[] = []
+const tags: Tag[] = []
+const users: User[] = []
+ 
 async function readStorage(): Promise<void> {
     try {
         const data = await fs.promises.readFile('./storeFile.json', 'utf-8');
@@ -40,25 +36,26 @@ async function updateStorage(data:Note): Promise<void> {
   }
 }
 
+//Wyswietlanie
+app.get('/note/:id', async function(req: Request, res: Response){
+  await readStorage();
+  const note = notes.find(n => n.id === +req.params.id)
+  console.log(+req.params.id)
+  if(note == undefined ) res.status(404).send('Note does not exist')
+  else res.status(200).json(note)
+})
+
 
 //DODAWANIE
 app.post('/note', async function(req: Request, res: Response){
   await readStorage()
-  const note = req.body
+  const note: Note = req.body
   if(note.title == undefined) res.status(400).send('Note title is undefined')
   if(note.content == undefined) res.status(400).send('Note content is undefined')
   note.id = Date.now()
   notes.push(note)
   res.status(201).send(note)
   await updateStorage(note)
-})
-//Wyswietlanie
-app.get('/note/:id', async function(req: Request, res: Response){
-  await readStorage();
-  const id = Number(req.params.id)
-  const note = notes.find(note => note.id === id)
-  if(note == undefined ) res.status(404).send('Note does not exist')
-  res.status(200).json(note)
 })
 
 //EDYCJA
@@ -82,12 +79,16 @@ app.put('/note/:id', async function(req: Request, res: Response){
 })
 
 //USUWANIE
-app.delete('/note/:id', function(req: Request, res: Response){
-  const id = Number(req.params.id)
-  const note = notes.findIndex(note => note.id === id)
-  if(note == undefined ) res.status(400).send('Note does not exist')
-  notes.splice(note, 1)
-  res.send().status(204)
+app.delete('/note/:id', async function (req: Request, res: Response){
+  const note = notes.find(n => n.id === req.body.id)
+  if(note === undefined) {
+      res.status(400).send('Note does not exist')
+  }
+  else {
+      notes.splice(req.body.id, 1)
+      res.status(204).send(note)
+      await updateStorage(note);
+  }
 })
 
 //POBIERANIE LISTY NOTATEK
@@ -146,7 +147,7 @@ app.get('/tags', function(req: Request, res: Response){
 
 
  //USUWANIE TAGOW
-app.delete('/tag/:id', function(req: Request, res: Response){
+app.delete('/tag/:id', async function(req: Request, res: Response){
   const id = Number(req.params.id)
   const tag = tags.findIndex(tag => tag.id === id)
   if(tag == undefined ) res.status(400).send('Note does not exist')
