@@ -1,14 +1,20 @@
-import { Request, Response } from 'express';
-import jwt from "jsonwebtoken";
+import { Request, Response } from 'express'
+import jwt from "jsonwebtoken"
 
 export class User{
     id?: number
     login: string
     password: string
 
-    constructor(user: User){
-        this.login = user.login;
+    constructor(user?: User){
+      if(user){
+        this.login = user.login
         this.password = user.password
+      }
+      else{
+        this.login = ''
+        this.password = ''
+      }
     }
 }
 

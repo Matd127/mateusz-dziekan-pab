@@ -1,10 +1,11 @@
-import { Tag } from "./Tag";
+import { Tag } from "./Tag"
 
-export interface Note{
-    title:string;
-    content:string;
-    createDate?:string;
-    tags?:Tag[];
-    id?:number;
+export class Note{
+    title:string
+    content:string
+    createDate?:string
+    tags?:string
+    usersId?: number[]
+    id?:number
   }
   

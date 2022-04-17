@@ -1,19 +1,20 @@
 import fs from 'fs';
-import {Note} from './Models/Note'
+import { All } from './Models/All';
 
 export class FileOperations{
 
-    public async readStorage(): Promise<void> {
+    public async readStorage(): Promise<string> {
         try {
-            const data = await fs.promises.readFile('./storeFile.json', 'utf-8');
+            return await fs.promises.readFile('./storeFile.json', 'utf-8')
         } catch (err) {
             console.log(err)
+            return ""
         }
     }
     
-    public async updateStorage(data:Note): Promise<void> {
+    public async updateStorage(data:All): Promise<void> {
       try {
-          await fs.promises.writeFile('./storeFile.json', JSON.stringify(data));
+          await fs.promises.writeFile('./storeFile.json', JSON.stringify(data))
       } catch (err) {
           console.log(err)
       }
