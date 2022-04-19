@@ -5,7 +5,8 @@ export class Note{
     content:string
     createDate?:string
     tags?:string
-    usersId?: number[]
+    usersId?: number
     id?:number
+    private: boolean = true;
   }
   
