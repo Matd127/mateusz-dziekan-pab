@@ -7,9 +7,43 @@ import {Tag} from '../Models/Tag'
 import {Auth, User} from '../Models/User'
 import {FileOperations } from '../FileOperations';
 
+//MongoDb
+import { ChangeStreamDocument } from "mongodb";
+import mongoose from "mongoose";
+
+const connectionString  = "mongodb+srv://Admin:eAWpToRKb6szpJL8@notes.ddnpw.mongodb.net/Notes?retryWrites=true&w=majority"
+
+const notesSchema = new mongoose.Schema({
+  title: String,
+  content: String,
+  private: Boolean,
+  tags: String
+}, {
+  timestamps: true
+})
+
+main()
+async function main(){
+    console.log('Connecting to mongo');
+    mongoose.connect(connectionString)
+    console.log('Connected')
+
+    const noteModel = mongoose.model('notes', notesSchema)
+    const newNote = new noteModel({
+      title: 'New note',
+      content: 'From mongoose',
+      private: true,
+      tags: 'Some tag'
+  })
+  await newNote.save();
+  console.log('SAVE - new note id: ', newNote.id);
+}
+//RESZTA NIZEJ
+
 const app = express()
 app.use(express.json())
 const ACCESS_TOKEN = 'bckjabdkjawj4l23k4j23lj4i23o4u328908342';
+
 
 //Deklaracja
 let all = new All();
