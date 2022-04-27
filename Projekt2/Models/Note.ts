@@ -1,5 +1,3 @@
-import { Tag } from "./Tag"
-
 export class Note{
     title:string
     content:string
@@ -9,4 +7,3 @@ export class Note{
     id?:number
     private: boolean = true;
   }
-  
